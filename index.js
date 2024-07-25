@@ -1,6 +1,9 @@
 const express = require("express");
 const cors = require("cors");
-require("dotenv");
+require("dotenv").config();
+const connectDB = require("./config/connectDB.js");
+// connectDB();
+
 const app = express();
 
 app.use(
@@ -10,14 +13,14 @@ app.use(
   })
 );
 
-
 const PORT = process.env.PORT || 8080;
 
-app.get("/", (req,res)=>{
-    res.send("Hello")
-})
+app.get("/", (req, res) => {
+  res.json({ message: "Hello" });
+});
 
-
-app.listen(PORT, () =>{
+connectDB().then(() => {
+  app.listen(PORT, () => {
     console.log("http://localhost:" + PORT);
-})
+  });
+});
