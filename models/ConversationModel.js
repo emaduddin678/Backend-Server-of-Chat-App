@@ -1,4 +1,5 @@
-const mongoose = require("mongoose");
+// const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const conversationSchema = new mongoose.Schema(
   {
@@ -13,9 +14,10 @@ const conversationSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  } 
 );
 
-const UserModel = mongoose.model("User", userSchema);
+const conversationModel = mongoose.model("User", conversationSchema);
 
-module.exports = UserModel;
+export default conversationModel;
+ 
