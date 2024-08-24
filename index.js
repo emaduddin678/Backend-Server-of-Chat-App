@@ -5,6 +5,7 @@ import connectDB from "./config/connectDB.js";
 import dotenv from "dotenv";
 import userRouter from "./routers/userRouter.js";
 import authRouter from "./routers/authRouter.js";
+import testingRouter from "./routers/testingRouter.js";
 dotenv.config();
 // connectDB();
 
@@ -32,6 +33,9 @@ app.use("/api/user/", userRouter);
 
 // Api route for Authentication 
 app.use("/api/auth/", authRouter);
+
+// Api route for Testing Route
+app.use("/api/testing/", testingRouter);
 
 
 connectDB().then(() => {

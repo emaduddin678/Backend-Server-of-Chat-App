@@ -51,17 +51,17 @@ const handleLogin = async (request, response, next) => {
   } catch (error) {
     return response.status(404).json({
       message: "Something wrong, while login!!",
-      payload: { userWithoutPassword },
       error: true,
     });
   }
 };
-const handleLogout = async (request, res, next) => {
+const handleLogout = async (request, response) => {
   try {
     // success response
     return response.status(202).json({
       message: "users logged out  successfully!!",
       payload: {},
+      success: true,
       error: false,
     });
   } catch (error) {
