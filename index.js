@@ -2,26 +2,33 @@ import express from "express";
 import cors from "cors";
 import connectDB from "./config/connectDB.js";
 
-import dotenv from "dotenv"; 
+import dotenv from "dotenv";
+import userRouter from "./routers/userRouter.js";
 dotenv.config();
 // connectDB();
 
-
-
+const PORT = process.env.PORT || 8080;
 const app = express();
-
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: process.env.FRONTEND_URL, 
     credentials: true,
   })
 );
+// Middleware to parse JSON bodies
+app.use(express.json());
+// Middleware to parse URL-encoded bodies (e.g., form submissions)
+app.use(express.urlencoded({ extended: true }));
 
-const PORT = process.env.PORT || 8080;
+
 
 app.get("/", (req, res) => {
-  res.json({ message: "Hello" });
+  res.json({ message: "Server is Working fine!" });
 });
+
+// Api route for crud function of user 
+app.use("/api/user/", userRouter);
+
 
 connectDB().then(() => {
   app.listen(PORT, () => {
