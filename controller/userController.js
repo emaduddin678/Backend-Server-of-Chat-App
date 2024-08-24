@@ -1,7 +1,7 @@
 import UserModel from "../models/UserModel.js";
 import bcryptjs from "bcryptjs";
 
-const registerUser = async (request, response) => {
+const createUser = async (request, response) => {
   try {
     // console.log("request.body", request.body);
 
@@ -12,7 +12,7 @@ const registerUser = async (request, response) => {
 
     if (checkEmail) {
       return response.status(400).json({
-        message: "User Already Exists!",
+        message: "User with this email, Already Exists!",
         error: true,
       });
     }
@@ -49,7 +49,7 @@ const registerUser = async (request, response) => {
 const getAllUser = async (request, response) => {
   try {
     const users = await UserModel.find();
-    console.log("JSON.stringify(users)");
+    // console.log("JSON.stringify(users)");
 
     return response.status(201).json({
       message: "All user fetched successfully!",
@@ -64,4 +64,4 @@ const getAllUser = async (request, response) => {
   }
 };
 
-export { registerUser, getAllUser };
+export { createUser, getAllUser };
