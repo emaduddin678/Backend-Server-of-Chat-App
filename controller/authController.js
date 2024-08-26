@@ -2,8 +2,11 @@ import bcryptjs from "bcryptjs";
 import UserModel from "../models/UserModel.js";
 import checkUserExists from "../helper/checkUserExists.js";
 import checkPassword from "../helper/checkPassword.js";
+import jwt from "jsonwebtoken";
+import createJSONWebToken from "../helper/createJSONWebToken.js";
+import { jwtAccessKey } from "../secret.js";
 
-const handleLogin = async (request, response, next) => {
+const handleLogin = async (request, response) => {
   try {
     const { email, password } = request.body;
 
@@ -21,6 +24,7 @@ const handleLogin = async (request, response, next) => {
       });
     }
 
+    // checking real user
     const user = await checkUserExists(email);
     if (!user) {
       return response.status(404).json({
@@ -29,8 +33,8 @@ const handleLogin = async (request, response, next) => {
       });
     }
 
+    // checking Password
     const isPasswordMatch = await checkPassword(password, user.password);
-
     if (!isPasswordMatch) {
       return response.status(401).json({
         message: "Email/password does not match!!",
@@ -42,10 +46,19 @@ const handleLogin = async (request, response, next) => {
     const userWithoutPassword = user.toObject();
     delete userWithoutPassword.password;
 
+    // handle jwt token
+    // token, cookie
+    const accessToken = createJSONWebToken(
+      userWithoutPassword,
+      jwtAccessKey,
+      "5m"
+    );
+
     // success response
     return response.status(202).json({
       message: "Users logged in  successfully!!",
       payload: { userWithoutPassword },
+      success: true,
       error: false,
     });
   } catch (error) {

@@ -1,10 +1,16 @@
 import express from "express";
-import { getAllUser, createUser } from "../controller/userController.js";
+import {
+  getAllUser,
+  handleProcessRegister,
+  handleActivateUserAccount,
+} from "../controller/userController.js";
 
 const userRouter = express.Router();
 
 // registration api
-userRouter.post("/", createUser);
+userRouter.post("/", handleProcessRegister);
+// registration api
+userRouter.get("/activate/:token", handleActivateUserAccount);
 
 // get all user 
 userRouter.get("/", getAllUser)

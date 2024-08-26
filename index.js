@@ -2,14 +2,14 @@ import express from "express";
 import cors from "cors";
 import connectDB from "./config/connectDB.js";
 
-import dotenv from "dotenv";
+
 import userRouter from "./routers/userRouter.js";
 import authRouter from "./routers/authRouter.js";
 import testingRouter from "./routers/testingRouter.js";
-dotenv.config();
+import { serverPort } from "./secret.js";
 // connectDB();
 
-const PORT = process.env.PORT || 8080;
+const PORT = serverPort;
 const app = express();
 app.use(
   cors({

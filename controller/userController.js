@@ -1,7 +1,7 @@
 import UserModel from "../models/UserModel.js";
 import bcryptjs from "bcryptjs";
 
-const createUser = async (request, response) => {
+const handleProcessRegister = async (request, response) => {
   try {
     // console.log("request.body", request.body);
 
@@ -27,10 +27,8 @@ const createUser = async (request, response) => {
       profile_pic,
       password: hashpassword,
     };
-    console.log(payload);
 
     const user = new UserModel(payload);
-
     const userSaved = await user.save();
 
     return response.status(201).json({
@@ -41,6 +39,58 @@ const createUser = async (request, response) => {
   } catch (error) {
     return response.status(500).json({
       message: error.message || error,
+      success: false,
+      error: true,
+    });
+  }
+};
+
+const handleActivateUserAccount = async (request, response) => {
+  try {
+    const token = req.params.token;
+
+    if (!token) throw createError(404, "token not found!");
+
+    try {
+      const decoded = jwt.verify(token, jwtActivationKey);
+      if (!decoded) throw createError(404, "user was not able to verified");
+
+      const userExists = await User.exists({ email: decoded.email });
+      if (userExists) {
+        throw createError(
+          409,
+          "User with this email already exist. Please login"
+        );
+      }
+
+      const image = decoded.image;
+      if (image) {
+        const response = await cloudinary.uploader.upload(image, {
+          folder: "EcommerceImageServer/users",
+        });
+        decoded.image = response.secure_url;
+      }
+
+      const user = await User.create(decoded);
+
+      return successResponse(res, {
+        statusCode: 201,
+        message: `User was registration successfully`,
+        payload: user,
+      });
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        throw createError(401, "Token has expired");
+      } else if (error.name === "JsonWebTokenError") {
+        throw createError(401, "Invalid Token");
+      } else {
+        throw error;
+      }
+    }
+  } catch (error) {
+    return response.status(500).json({
+      message: error.message || error,
+      success: false,
       error: true,
     });
   }
@@ -64,4 +114,4 @@ const getAllUser = async (request, response) => {
   }
 };
 
-export { createUser, getAllUser };
+export { handleProcessRegister, getAllUser, handleActivateUserAccount };

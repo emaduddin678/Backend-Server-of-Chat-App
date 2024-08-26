@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
+import { mongodbURL } from "../secret.js";
 
 const connectDB = async (a) => {
   try {
-    await mongoose.connect(process.env.MONGOOSE_URL);
+    await mongoose.connect(mongodbURL);
     const connection = mongoose.connection;
     // console.log(a);
     connection.on("connected", () => {
