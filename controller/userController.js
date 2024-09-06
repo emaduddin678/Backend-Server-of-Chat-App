@@ -1,19 +1,23 @@
+import checkUserExists from "../helper/checkUserExists.js";
+import createJSONWebToken from "../helper/createJSONWebToken.js";
 import UserModel from "../models/UserModel.js";
 import bcryptjs from "bcryptjs";
+import { jwtActivationKey } from "../secret.js";
+import sendEmail from "../helper/sendEmail.js";
+import jwt from "jsonwebtoken";
+import createHttpError from "http-errors";
 
 const handleProcessRegister = async (request, response) => {
   try {
-    // console.log("request.body", request.body);
-
     const { name, email, password, profile_pic } = request.body;
 
-    const checkEmail = await UserModel.findOne({ email });
-    // console.log(checkEmail);
+    const userExists = await checkUserExists(email);
 
-    if (checkEmail) {
+    if (userExists) {
       return response.status(400).json({
         message: "User with this email, Already Exists!",
         error: true,
+        success: false,
       });
     }
 
@@ -21,20 +25,33 @@ const handleProcessRegister = async (request, response) => {
     const salt = await bcryptjs.genSalt(10);
     const hashpassword = await bcryptjs.hash(password, salt);
 
-    const payload = {
+    const tokenPayload = {
       name,
       email,
       profile_pic,
       password: hashpassword,
     };
 
-    const user = new UserModel(payload);
-    const userSaved = await user.save();
+    const token = createJSONWebToken(tokenPayload, jwtActivationKey, "10m");
 
-    return response.status(201).json({
-      message: "user created successfully!",
-      data: userSaved,
+    //prepare email
+    const emailData = {
+      name,
+      email,
+      subject: "Account Activation Email!",
+      apiURL: `http://localhost:8000/api/user/activate/${token}`,
+    };
+
+    //send email with nodemailer;
+    await sendEmail(emailData);
+
+    // const user = new UserModel(tokenPayload);
+    // const userSaved = await user.save();
+
+    return response.status(200).json({
+      message: "An Email send to your mail!",
       success: true,
+      error: false,
     });
   } catch (error) {
     return response.status(500).json({
@@ -47,20 +64,28 @@ const handleProcessRegister = async (request, response) => {
 
 const handleActivateUserAccount = async (request, response) => {
   try {
-    const token = req.params.token;
+    const token = request.params.token;
 
-    if (!token) throw createError(404, "token not found!");
+    if (!token) throw createHttpError(404, "token not found!");
 
     try {
       const decoded = jwt.verify(token, jwtActivationKey);
-      if (!decoded) throw createError(404, "user was not able to verified");
+      if (!decoded) {
+        return response.status(404).json({
+          message: "user was not able to verified!",
+          error: true,
+          success: false,
+        });
+      }
 
-      const userExists = await User.exists({ email: decoded.email });
+      const userExists = await checkUserExists(decoded.email);
+
       if (userExists) {
-        throw createError(
-          409,
-          "User with this email already exist. Please login"
-        );
+        return response.status(400).json({
+          message: "User with this email, Already Exists!",
+          error: true,
+          success: false,
+        });
       }
 
       const image = decoded.image;
@@ -71,18 +96,19 @@ const handleActivateUserAccount = async (request, response) => {
         decoded.image = response.secure_url;
       }
 
-      const user = await User.create(decoded);
+      const user = await UserModel.create(decoded);
 
-      return successResponse(res, {
-        statusCode: 201,
-        message: `User was registration successfully`,
+      return response.status(201).json({
+        message: `User was registration successfully..`,
+        error: false,
+        success: true,
         payload: user,
       });
     } catch (error) {
       if (error.name === "TokenExpiredError") {
-        throw createError(401, "Token has expired");
+        throw createHttpError(401, "Token has expired");
       } else if (error.name === "JsonWebTokenError") {
-        throw createError(401, "Invalid Token");
+        throw createHttpError(401, "Invalid Token");
       } else {
         throw error;
       }
