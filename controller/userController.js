@@ -6,7 +6,9 @@ import { jwtActivationKey } from "../secret.js";
 import sendEmail from "../helper/sendEmail.js";
 import jwt from "jsonwebtoken";
 import createHttpError from "http-errors";
+import { findUserById } from "../services/userService.js";
 
+// process register with information
 const handleProcessRegister = async (request, response) => {
   try {
     const { name, email, password, profile_pic } = request.body;
@@ -62,6 +64,7 @@ const handleProcessRegister = async (request, response) => {
   }
 };
 
+// activation user
 const handleActivateUserAccount = async (request, response) => {
   try {
     const token = request.params.token;
@@ -122,6 +125,7 @@ const handleActivateUserAccount = async (request, response) => {
   }
 };
 
+// get All user
 const getAllUser = async (request, response) => {
   try {
     const users = await UserModel.find();
@@ -140,4 +144,32 @@ const getAllUser = async (request, response) => {
   }
 };
 
-export { handleProcessRegister, getAllUser, handleActivateUserAccount };
+const handleGetUserById = async (request, response) => {
+  try {
+    const id = request.params.id;
+
+    const options = { password: 0 };
+
+    const user = await findUserById(id, options);
+
+    return response.status(201).json({
+      message: `User returned successfully..`,
+      payload: user,
+      error: false,
+      success: true,
+    });
+  } catch (error) {
+    return response.status(500).json({
+      message: error.message || error,
+      success: false,
+      error: true,
+    });
+  }
+};
+
+export {
+  handleProcessRegister,
+  getAllUser,
+  handleActivateUserAccount,
+  handleGetUserById,
+};
