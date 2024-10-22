@@ -46,6 +46,13 @@ app.use("/api/auth/", authRouter);
 // Api route for Testing Route
 app.use("/api/testing/", testingRouter);
 
+
+
+// error handling 
+
+// 404 not found handler 
+
+
 // database connection
 connectDB().then(() => {
   app.listen(PORT, () => {
