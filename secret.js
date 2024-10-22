@@ -2,6 +2,8 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const serverPort = process.env.SERVER_PORT || 8080;
+const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+
 const mongodbURL =
   process.env.MONGODB_ATLAS_URL || "mongodb://localhost:27017/ecommerceMernsDB";
 
@@ -18,6 +20,7 @@ const jwtResetPasswordKey =
 const smtpUsername = process.env.SMTP_USERNAME || "";
 const smtpPassword = process.env.SMTP_PASSWORD || "";
 const clientURL = process.env.CLIENT_URL || "";
+const cookieSecret = process.env.COOKIE_SECRET || "aslkdaldskfja234";
 
 export {
   serverPort,
@@ -29,4 +32,6 @@ export {
   jwtAccessKey,
   jwtRefreshKey,
   jwtResetPasswordKey,
+  cookieSecret,
+  frontendUrl,
 };

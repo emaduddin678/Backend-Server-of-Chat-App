@@ -1,19 +1,19 @@
 import express from "express";
 import cors from "cors";
+import { cookieSecret, frontendUrl, serverPort } from "./secret.js";
+import cookieParser from "cookie-parser";
+
 import connectDB from "./config/connectDB.js";
-
-
 import userRouter from "./routers/userRouter.js";
 import authRouter from "./routers/authRouter.js";
 import testingRouter from "./routers/testingRouter.js";
-import { serverPort } from "./secret.js";
 // connectDB();
 
 const PORT = serverPort;
 const app = express();
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL, 
+    origin: frontendUrl,
     credentials: true,
   })
 );
@@ -21,6 +21,8 @@ app.use(
 app.use(express.json());
 // Middleware to parse URL-encoded bodies (e.g., form submissions)
 app.use(express.urlencoded({ extended: true }));
+
+app.use(cookieParser(cookieSecret));
 
 
 
