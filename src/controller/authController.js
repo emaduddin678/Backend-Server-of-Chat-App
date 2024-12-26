@@ -5,6 +5,7 @@ import checkPassword from "../helper/checkPassword.js";
 import createJSONWebToken from "../helper/createJSONWebToken.js";
 import { jwtSecret } from "../../secret.js";
 import cloudinary from "../lib/cloudinary.js";
+import { uploadImage } from "../helper/uploadImageToCloudinary.js";
 
 const handleSignUp = async (request, response) => {
   try {
@@ -207,12 +208,12 @@ const updateProfile = async (request, response) => {
       name: name,
     };
 
-    const uploadResult = await cloudinary.uploader.upload(profilePic);
+    const uploadResult = await uploadImage(profilePic);
     const updatedUser = await UserModel.findByIdAndUpdate(
       userId,
       {
         ...updatedData,
-        profile_pic: uploadResult.secure_url,
+        profile_pic: uploadResult,
       },
       { new: true }
     );

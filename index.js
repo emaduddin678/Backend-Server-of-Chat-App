@@ -7,12 +7,12 @@ import connectDB from "./src/config/connectDB.js";
 import userRouter from "./src/routes/userRouter.js";
 import authRouter from "./src/routes/authRouter.js";
 import testingRouter from "./src/routes/testingRouter.js";
+import messageRouter from "./src/routes/messageRouter.js";
 
 const PORT = serverPort;
 
 // initial  server app
 const app = express();
-
 
 // cors setup
 app.use(
@@ -36,13 +36,16 @@ app.get("/", (req, res) => {
 });
 
 // Api route for crud function of user
-app.use("/api/user/", userRouter);
+app.use("/api/user", userRouter);
 
 // Api route for Authentication
-app.use("/api/auth/", authRouter);
+app.use("/api/auth", authRouter);
+
+// Api route for Messages
+app.use("/api/message", messageRouter);
 
 // Api route for Testing Route
-app.use("/api/testing/", testingRouter);
+app.use("/api/testing", testingRouter);
 
 // error handling
 

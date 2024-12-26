@@ -2,6 +2,16 @@ import { model, Schema } from "mongoose";
 
 const messageSchema = new Schema(
   {
+    senderId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true
+    },
+    receiverId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true
+    },
     text: {
       type: String,
       default: "",
@@ -10,14 +20,7 @@ const messageSchema = new Schema(
       type: String,
       default: "",
     },
-    videoUrl: {
-      type: String,
-      default: "",
-    },
-    seen: {
-      type: Boolean,
-      default: false,
-    },
+    
   },
   {
     timestamps: true,
