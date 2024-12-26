@@ -4,6 +4,7 @@ import checkUserExists from "../helper/checkUserExists.js";
 import checkPassword from "../helper/checkPassword.js";
 import createJSONWebToken from "../helper/createJSONWebToken.js";
 import { jwtSecret } from "../../secret.js";
+import cloudinary from "../lib/cloudinary.js";
 
 const handleSignUp = async (request, response) => {
   try {
@@ -83,7 +84,7 @@ const handleSignUp = async (request, response) => {
 
     // success response
     return response.status(202).json({
-      message: "Users logged in  successfully!!",
+      message: "User logged in  successfully!!",
       payload: { user: userWithoutPassword, token },
       success: true,
       error: false,
@@ -119,7 +120,7 @@ const handleLogin = async (request, response) => {
     }
 
     // checking real user
-    const user = await checkUserExists(email);
+    const user = await UserModel.findOne({ email });
     if (!user) {
       return response.status(404).json({
         message: "Invalid credentials!",
@@ -131,12 +132,14 @@ const handleLogin = async (request, response) => {
     // checking Password
     const isPasswordMatch = await checkPassword(password, user.password);
     if (!isPasswordMatch) {
+      console.log(user.password, password);
       return response.status(401).json({
         message: "Invalid credentials!",
         error: true,
         success: false,
       });
     }
+    console.log(isPasswordMatch);
 
     // user without password
     const userWithoutPassword = user.toObject();
@@ -153,7 +156,7 @@ const handleLogin = async (request, response) => {
 
     // success response
     return response.status(200).json({
-      message: "Users logged in  successfully!!",
+      message: "User logged in  successfully!!",
       payload: { user: userWithoutPassword, accessToken },
       success: true,
       error: false,
@@ -174,7 +177,7 @@ const handleLogout = async (request, response) => {
     });
     // success response
     return response.status(202).json({
-      message: "Users logged out successfully!!",
+      message: "User logged out successfully!!",
       payload: {},
       success: true,
       error: false,
@@ -191,60 +194,38 @@ const handleLogout = async (request, response) => {
 
 const updateProfile = async (request, response) => {
   try {
-    const user = request.user;
-    console.log(user)
+    const userId = request.user._id;
+    const { name, profilePic } = request.body;
+    console.log(profilePic, userId);
 
-    if (user.password && user.password.length < 6) {
-      return response.status(400).json({
-        message: "Password must be at least 6 characters!!",
-        error: true,
-        success: false,
-      });
+    if (!profilePic) {
+      return response
+        .status(400)
+        .json({ message: "Profile pic is required.." });
     }
-
-  
-
-    // password into hashpassword
-    const salt = await bcryptjs.genSalt(10);
-    const hashPassword = await bcryptjs.hash(password, salt);
-
-    const userData = {
-      name,
-      email,
-      password: hashPassword,
+    const updatedData = {
+      name: name,
     };
-    const newUser = new UserModel(userData);
-    // console.log(newUser)
-    // Return success response with user data (excluding password)
-    const userWithoutPassword = { ...newUser.toObject() };
-    delete userWithoutPassword.password; // Remove password before sending the response
 
-    const token = createJSONWebToken(
-      userWithoutPassword,
-      jwtSecret,
-      response,
-      "7d"
+    const uploadResult = await cloudinary.uploader.upload(profilePic);
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      userId,
+      {
+        ...updatedData,
+        profile_pic: uploadResult.secure_url,
+      },
+      { new: true }
     );
 
-    if (token) {
-      await newUser.save();
-    } else {
-      response.status(400).json({
-        message: "Invalid user data!!",
-        error: true,
-        success: false,
-      });
-    }
-
     // success response
-    return response.status(202).json({
-      message: "Users logged in  successfully!!",
-      payload: { user: userWithoutPassword, token },
+    return response.status(200).json({
+      message: "User updated in successfully!!",
+      payload: { user: updatedUser },
       success: true,
       error: false,
     });
   } catch (error) {
-    console.log("Error in signup controller", error.message);
+    console.log("Error in update controller", error.message);
     return response.status(500).json({
       message: "Internal Server Error",
       error: true,
@@ -253,4 +234,23 @@ const updateProfile = async (request, response) => {
   }
 };
 
-export { handleSignUp, handleLogin, handleLogout, updateProfile };
+const checkAuth = async (request, response) => {
+  try {
+    // success response
+    return response.status(200).json({
+      message: "User checked in successfully!!",
+      payload: { user: request.user },
+      success: true,
+      error: false,
+    });
+  } catch (error) {
+    console.log("Error in update controller", error.message);
+    return response.status(500).json({
+      message: "Internal Server Error",
+      error: true,
+      success: false,
+    });
+  }
+};
+
+export { handleSignUp, handleLogin, handleLogout, updateProfile, checkAuth };

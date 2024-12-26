@@ -6,6 +6,7 @@ const protectedRoute = async (request, response, next) => {
   try {
     const token = request.cookies.token;
     // If no token is provided, return Unauthorized (401)
+
     if (!token) {
       return response.status(401).json({
         message:
@@ -14,6 +15,7 @@ const protectedRoute = async (request, response, next) => {
         success: false,
       });
     }
+
     const decoded = jwt.verify(token, jwtSecret);
     if (!decoded) {
       return response.status(404).json({
@@ -23,7 +25,9 @@ const protectedRoute = async (request, response, next) => {
       });
     }
 
+    // console.log(decoded);
     const userExists = await checkUserExists(decoded.email);
+    // console.log(userExists);
     if (!userExists) {
       return response.status(404).json({
         message: "User does not exists. Please register ",

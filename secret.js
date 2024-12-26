@@ -21,6 +21,8 @@ const smtpPassword = process.env.SMTP_PASSWORD || "";
 const clientURL = process.env.CLIENT_URL || "";
 const cookieSecret = process.env.COOKIE_SECRET || "aslkdaldskfja234";
 const nodeEnv = process.env.NODE_ENV || "development";
+const cloudinarApiSecret = process.env.CLOUDINARY_API_SECRET;
+
 export {
   appName,
   serverPort,
@@ -36,4 +38,5 @@ export {
   cookieSecret,
   frontendUrl,
   nodeEnv,
+  cloudinarApiSecret,
 };
