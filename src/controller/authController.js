@@ -4,7 +4,7 @@ import checkUserExists from "../helper/checkUserExists.js";
 import checkPassword from "../helper/checkPassword.js";
 import jwt from "jsonwebtoken";
 import createJSONWebToken from "../helper/createJSONWebToken.js";
-import { jwtAccessKey } from "../../secret.js";
+import { jwtAccessKey, jwtSecret } from "../../secret.js";
 
 const handleSignUp = async (request, response) => {
   try {
@@ -12,65 +12,89 @@ const handleSignUp = async (request, response) => {
 
     // Handle empty or undefined email and password
     if (!name) {
-      return response.status(401).json({
+      return response.status(400).json({
         message: "Name is empty, Please provide your name!!",
         error: true,
+        success: false,
       });
     }
     if (!email) {
-      return response.status(401).json({
+      return response.status(400).json({
         message: "Email is empty, Please provide a valid email!!",
         error: true,
+        success: false,
       });
     }
     if (!password) {
-      return response.status(401).json({
+      return response.status(400).json({
         message: "Password is empty, Please provide password!!",
         error: true,
+        success: false,
+      });
+    }
+    if (password.length < 6) {
+      return response.status(400).json({
+        message: "Password must be at least 6 characters!!",
+        error: true,
+        success: false,
       });
     }
 
-    // checking real user
+    // Checking if the user already exists
     const user = await checkUserExists(email);
-    if (!user) {
-      return response.status(404).json({
-        message: "User does not exist with this email. Please register first!",
+    if (user) {
+      return response.status(409).json({
+        message: "User with this email already exists!",
         error: true,
+        success: false,
       });
     }
 
-    // checking Password
-    const isPasswordMatch = await checkPassword(password, user.password);
-    if (!isPasswordMatch) {
-      return response.status(401).json({
-        message: "Email/password does not match!!",
-        error: true,
-      });
-    }
+    // password into hashpassword
+    const salt = await bcryptjs.genSalt(10);
+    const hashPassword = await bcryptjs.hash(password, salt);
 
-    // user without password
-    const userWithoutPassword = user.toObject();
-    delete userWithoutPassword.password;
+    const userData = {
+      name,
+      email,
+      password: hashPassword,
+    };
+    const newUser = new UserModel(userData);
+    // console.log(newUser)
+    // Return success response with user data (excluding password)
+    const userWithoutPassword = { ...newUser.toObject() };
+    delete userWithoutPassword.password; // Remove password before sending the response
 
-    // handle jwt token
-    // token, cookie
-    const accessToken = createJSONWebToken(
+    const token = createJSONWebToken(
       userWithoutPassword,
-      jwtAccessKey,
-      "5m"
+      jwtSecret,
+      response,
+      "7d"
     );
+
+    if (token) {
+      await newUser.save();
+    } else {
+      response.status(400).json({
+        message: "Invalid user data!!",
+        error: true,
+        success: false,
+      });
+    }
 
     // success response
     return response.status(202).json({
       message: "Users logged in  successfully!!",
-      payload: { userWithoutPassword },
+      payload: { user: userWithoutPassword, token },
       success: true,
       error: false,
     });
   } catch (error) {
-    return response.status(404).json({
-      message: "Something wrong, while login!!",
+    console.log("Error in signup controller", error.message);
+    return response.status(500).json({
+      message: "Internal Server Error",
       error: true,
+      success: false,
     });
   }
 };
@@ -81,15 +105,17 @@ const handleLogin = async (request, response) => {
 
     // Handle empty or undefined email and password
     if (!email) {
-      return response.status(401).json({
+      return response.status(400).json({
         message: "Email is empty, Please provide a valid email!!",
         error: true,
+        success: false,
       });
     }
     if (!password) {
-      return response.status(401).json({
+      return response.status(400).json({
         message: "Password is empty, Please provide password!!",
         error: true,
+        success: false,
       });
     }
 
@@ -97,8 +123,9 @@ const handleLogin = async (request, response) => {
     const user = await checkUserExists(email);
     if (!user) {
       return response.status(404).json({
-        message: "User does not exist with this email. Please register first!",
+        message: "Invalid credentials!",
         error: true,
+        success: false,
       });
     }
 
@@ -106,8 +133,9 @@ const handleLogin = async (request, response) => {
     const isPasswordMatch = await checkPassword(password, user.password);
     if (!isPasswordMatch) {
       return response.status(401).json({
-        message: "Email/password does not match!!",
+        message: "Invalid credentials!",
         error: true,
+        success: false,
       });
     }
 
@@ -119,38 +147,45 @@ const handleLogin = async (request, response) => {
     // token, cookie
     const accessToken = createJSONWebToken(
       userWithoutPassword,
-      jwtAccessKey,
-      "5m"
+      jwtSecret,
+      response,
+      "7d"
     );
 
     // success response
-    return response.status(202).json({
+    return response.status(200).json({
       message: "Users logged in  successfully!!",
-      payload: { userWithoutPassword },
+      payload: { user: userWithoutPassword, accessToken },
       success: true,
       error: false,
     });
   } catch (error) {
-    return response.status(404).json({
-      message: "Something wrong, while login!!",
+    console.log("Error in login controller", error.message);
+    return response.status(500).json({
+      message: "Internal Server Error",
       error: true,
     });
   }
 };
+
 const handleLogout = async (request, response) => {
   try {
+    response.cookie("token", "", {
+      maxAge: 0,
+    });
     // success response
     return response.status(202).json({
-      message: "users logged out  successfully!!",
+      message: "Users logged out successfully!!",
       payload: {},
       success: true,
       error: false,
     });
   } catch (error) {
-    return response.status(404).json({
-      message: "Something wrong, while logging out!!",
-      payload: {},
+    console.log("Error in logout controller", error.message);
+    return response.status(500).json({
+      message: "Internal Server Error",
       error: true,
+      success: false,
     });
   }
 };

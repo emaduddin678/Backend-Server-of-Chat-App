@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
+import { nodeEnv } from "../../secret.js";
 
-const createJSONWebToken = (payload, secretKey, expiresIn) => {
+const createJSONWebToken = (payload, secretKey, response, expiresIn) => {
   if (typeof payload !== "object" || !payload) {
     throw new Error("Payload must be a non-empty object!");
   }
@@ -10,10 +11,19 @@ const createJSONWebToken = (payload, secretKey, expiresIn) => {
   }
 
   try {
+    // console.log("Helloasdf",payload);
     const token = jwt.sign(payload, secretKey, { expiresIn });
-
+    // console.log("Hello");
+    response.cookie("token", token, {
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      sameSite: "strict",
+      secure: nodeEnv !== "development",
+    });
+    // console.log("Hell2");
     return token;
-  } catch (error) {
+  } catch (error) { 
+    // console.log("Hell3");
     console.error("Failed to sign the JWT emad:", error);
     throw error;
   }
