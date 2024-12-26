@@ -3,18 +3,16 @@ import cors from "cors";
 import { cookieSecret, frontendUrl, serverPort } from "./secret.js";
 import cookieParser from "cookie-parser";
 
-import connectDB from "./config/connectDB.js";
-import userRouter from "./routers/userRouter.js";
-import authRouter from "./routers/authRouter.js";
-import testingRouter from "./routers/testingRouter.js";
+import connectDB from "./src/config/connectDB.js";
+import userRouter from "./src/routes/userRouter.js";
+import authRouter from "./src/routes/authRouter.js";
+import testingRouter from "./src/routes/testingRouter.js";
 
 const PORT = serverPort;
 
 // initial  server app
 const app = express();
 
-// if database is not connected in production then connect it in the top of the app.
-// connectDB();
 
 // cors setup
 app.use(
@@ -46,12 +44,9 @@ app.use("/api/auth/", authRouter);
 // Api route for Testing Route
 app.use("/api/testing/", testingRouter);
 
+// error handling
 
-
-// error handling 
-
-// 404 not found handler 
-
+// 404 not found handler
 
 // database connection
 connectDB().then(() => {

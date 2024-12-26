@@ -2,7 +2,7 @@ import checkUserExists from "../helper/checkUserExists.js";
 import createJSONWebToken from "../helper/createJSONWebToken.js";
 import UserModel from "../models/UserModel.js";
 import bcryptjs from "bcryptjs";
-import { jwtActivationKey } from "../secret.js";
+import { jwtActivationKey } from "../../secret.js";
 import sendEmail from "../helper/sendEmail.js";
 import jwt from "jsonwebtoken";
 import createHttpError from "http-errors";
