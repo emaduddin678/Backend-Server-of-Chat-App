@@ -2,9 +2,8 @@ import bcryptjs from "bcryptjs";
 import UserModel from "../models/UserModel.js";
 import checkUserExists from "../helper/checkUserExists.js";
 import checkPassword from "../helper/checkPassword.js";
-import jwt from "jsonwebtoken";
 import createJSONWebToken from "../helper/createJSONWebToken.js";
-import { jwtAccessKey, jwtSecret } from "../../secret.js";
+import { jwtSecret } from "../../secret.js";
 
 const handleSignUp = async (request, response) => {
   try {
@@ -190,4 +189,68 @@ const handleLogout = async (request, response) => {
   }
 };
 
-export { handleSignUp, handleLogin, handleLogout };
+const updateProfile = async (request, response) => {
+  try {
+    const user = request.user;
+    console.log(user)
+
+    if (user.password && user.password.length < 6) {
+      return response.status(400).json({
+        message: "Password must be at least 6 characters!!",
+        error: true,
+        success: false,
+      });
+    }
+
+  
+
+    // password into hashpassword
+    const salt = await bcryptjs.genSalt(10);
+    const hashPassword = await bcryptjs.hash(password, salt);
+
+    const userData = {
+      name,
+      email,
+      password: hashPassword,
+    };
+    const newUser = new UserModel(userData);
+    // console.log(newUser)
+    // Return success response with user data (excluding password)
+    const userWithoutPassword = { ...newUser.toObject() };
+    delete userWithoutPassword.password; // Remove password before sending the response
+
+    const token = createJSONWebToken(
+      userWithoutPassword,
+      jwtSecret,
+      response,
+      "7d"
+    );
+
+    if (token) {
+      await newUser.save();
+    } else {
+      response.status(400).json({
+        message: "Invalid user data!!",
+        error: true,
+        success: false,
+      });
+    }
+
+    // success response
+    return response.status(202).json({
+      message: "Users logged in  successfully!!",
+      payload: { user: userWithoutPassword, token },
+      success: true,
+      error: false,
+    });
+  } catch (error) {
+    console.log("Error in signup controller", error.message);
+    return response.status(500).json({
+      message: "Internal Server Error",
+      error: true,
+      success: false,
+    });
+  }
+};
+
+export { handleSignUp, handleLogin, handleLogout, updateProfile };
