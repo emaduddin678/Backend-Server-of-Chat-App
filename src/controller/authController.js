@@ -11,6 +11,7 @@ const handleSignUp = async (request, response) => {
   try {
     const { name, email, password } = request.body;
 
+    console.log(request.body)
     // Handle empty or undefined email and password
     if (!name) {
       return response.status(400).json({
@@ -61,7 +62,7 @@ const handleSignUp = async (request, response) => {
       password: hashPassword,
     };
     const newUser = new UserModel(userData);
-    // console.log(newUser)
+    console.log(newUser)
     // Return success response with user data (excluding password)
     const userWithoutPassword = { ...newUser.toObject() };
     delete userWithoutPassword.password; // Remove password before sending the response
@@ -197,7 +198,7 @@ const updateProfile = async (request, response) => {
   try {
     const userId = request.user._id;
     const { name, profilePic } = request.body;
-    console.log(profilePic, userId);
+    // console.log(profilePic, userId);
 
     if (!profilePic) {
       return response
@@ -209,6 +210,7 @@ const updateProfile = async (request, response) => {
     };
 
     const uploadResult = await uploadImage(profilePic);
+    console.log(uploadResult);
     const updatedUser = await UserModel.findByIdAndUpdate(
       userId,
       {
