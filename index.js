@@ -42,7 +42,7 @@ app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 
 // Api route for Messages
-app.use("/api/message", messageRouter);
+app.use("/api/messages", messageRouter);
 
 // Api route for Testing Route
 app.use("/api/testing", testingRouter);

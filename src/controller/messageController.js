@@ -4,7 +4,7 @@ import MessageModel from "../models/MessageModel.js";
 const getMessages = async (request, response) => {
   try {
     const { id: userToChatId } = request.params;
-    const myId = req.user._id;
+    const myId = request.user._id;
     const messages = await MessageModel.find({
       $or: [
         { senderId: myId, receiverId: userToChatId },
@@ -31,13 +31,16 @@ const getMessages = async (request, response) => {
 const sendMessages = async (request, response) => {
   try {
     const { id: receiverId } = request.params;
-    const senderId = req.user._id;
-    const { text, image } = req.body;
+    const senderId = request.user._id;
+    console.log(request.user._id);
+    const { text, image } = request.body;
     let imageUrl;
 
     if (image) {
       imageUrl = await uploadImage(image);
     }
+    console.log(imageUrl);
+    
 
     const newMessage = new MessageModel({
       senderId,

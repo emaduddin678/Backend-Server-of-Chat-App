@@ -135,7 +135,7 @@ const getUsersForSidebar = async (request, response) => {
 
     return response.status(200).json({
       message: "All user fetched successfully!",
-      data: users,
+      payload: users,
       success: true,
       error: false
     });
