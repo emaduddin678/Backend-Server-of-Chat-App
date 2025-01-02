@@ -8,11 +8,12 @@ import userRouter from "./src/routes/userRouter.js";
 import authRouter from "./src/routes/authRouter.js";
 import testingRouter from "./src/routes/testingRouter.js";
 import messageRouter from "./src/routes/messageRouter.js";
+import { app, server } from "./src/lib/socket.js";
 
 const PORT = serverPort;
 
 // initial  server app
-const app = express();
+// const app = express();
 
 // cors setup
 app.use(
@@ -53,7 +54,7 @@ app.use("/api/testing", testingRouter);
 
 // database connection
 connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log("http://localhost:" + PORT);
+  server.listen(PORT, () => {
+  console.log("http://localhost:" + PORT);
   });
 });

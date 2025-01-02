@@ -32,14 +32,14 @@ const sendMessages = async (request, response) => {
   try {
     const { id: receiverId } = request.params;
     const senderId = request.user._id;
-    console.log(request.user._id);
+    // console.log(request.user._id);
     const { text, image } = request.body;
     let imageUrl;
 
     if (image) {
       imageUrl = await uploadImage(image);
     }
-    console.log(imageUrl);
+    // console.log(imageUrl);
     
 
     const newMessage = new MessageModel({
