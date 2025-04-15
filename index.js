@@ -22,6 +22,11 @@ app.use(
     credentials: true,
   })
 );
+app.use((req, res, next) => {
+  console.log("Incoming request origin:", req.headers.origin);
+  next();
+});
+
 
 // Middleware to request parse
 app.use(express.json({ limit: "10mb" }));
