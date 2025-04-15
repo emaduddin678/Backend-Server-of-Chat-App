@@ -1,4 +1,5 @@
 import { uploadImage } from "../helper/uploadImageToCloudinary.js";
+import { getReceiverSocketId, io } from "../lib/socket.js";
 import MessageModel from "../models/MessageModel.js";
 
 const getMessages = async (request, response) => {
@@ -40,7 +41,6 @@ const sendMessages = async (request, response) => {
       imageUrl = await uploadImage(image);
     }
     // console.log(imageUrl);
-    
 
     const newMessage = new MessageModel({
       senderId,
@@ -50,7 +50,11 @@ const sendMessages = async (request, response) => {
     });
     const message = await newMessage.save();
 
-    // todo: realtime functionality is here => socket.io
+    //  realtime functionality is here => socket.io
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("newMessage", message);
+    }
 
     // success response
     return response.status(200).json({

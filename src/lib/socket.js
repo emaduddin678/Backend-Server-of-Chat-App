@@ -11,14 +11,17 @@ const io = new Server(server, {
     origin: [frontendUrl],
   },
 });
-
 const userSocketMap = {};
+
+export function getReceiverSocketId(userId) {
+  return userSocketMap[userId];
+}
 
 io.on("connection", (socket) => {
   console.log("An user connected", socket.id);
 
   const userId = socket.handshake.query.userId;
-  
+
   if (userId) userSocketMap[userId] = socket.id;
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
 

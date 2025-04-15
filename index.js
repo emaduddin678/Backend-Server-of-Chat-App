@@ -26,7 +26,7 @@ app.use(
 // Middleware to request parse
 app.use(express.json({ limit: "10mb" }));
 // Middleware to parse URL-encoded bodies (e.g., form submissions)
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" })); 
 
 // Middleware to parse cookies
 app.use(cookieParser(cookieSecret));
