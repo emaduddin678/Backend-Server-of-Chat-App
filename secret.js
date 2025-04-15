@@ -3,7 +3,7 @@ dotenv.config();
 
 const appName = process.env.APP_NAME || "Chit Chat Application";
 const serverPort = process.env.SERVER_PORT || 8080;
-const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+const frontendUrl = process.env.FRONTEND_URL ;
 
 const mongodbURL =
   process.env.MONGODB_ATLAS_URL || "mongodb://localhost:27017/ecommerceMernsDB";
